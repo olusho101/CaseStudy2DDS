@@ -96,14 +96,12 @@ skim(dfTrain3)
 ncol(dfTrain3)
 
 ```
-***
+
 # Check if all categorical variables are stored as factors, if not then convert all categorical variables to factors
 # The categorical variables are; "Attrition", "BusinessTravel", "Department", "EducationField", "Gender", "JobRole", "MaritalStatus", "Over18", "OverTime"
 
 
-
-
-### 5. Storing all level numeric variables as factors
+# Storing all level numeric variables as factors
 
 ```{r level variables}
 # Categorical Variables
@@ -122,7 +120,7 @@ skim(dfTrain3)
 ncol(dfTrain3)
 ```
 
-# 6. Checking to see the correlation on numeric variables
+# Checking to see the correlation on numeric variables
 - Highly correlated relationships
   - Total Working Years v Monthly Income: .78
   - Years at Company v Years in Current Role .78
@@ -142,8 +140,7 @@ corrdfTrain %>% keep(is.numeric) %>% na.omit %>% cor %>% corrplot("upper", addCo
 invisible(view(corrdfTraintable))
 ```
 
-***
-#### Correlation Review
+# Correlation Review
 - Reviewing the correlated variables we can logically conclude some of these are saying similar things. However, the high correlation doesn't tell the whole story. We will keep investigating to get a better picture of these variables and their importance to Attrition.
   - Keep: "MonthlyIncome", "YearsInCurrentRole", "YearsSinceLastPromotion", "YearsAtCompany", "TotalWorkingYears", "YearsWithCurrManager"
   - Drop: "YearsatCompany"
@@ -156,7 +153,6 @@ skim(dfTrain3)
 ncol(dfTrain3)
 ```
 
-***
 # EDA Numerical variables vs Categorical variables
 #Comparison of Attrition (the variable of interest) to categorical variables left in model
   - Colored by Attrition
@@ -181,7 +177,7 @@ PlotFunc(dfTrain3, explanatory =  "TotalWorkingYears", response = "Attrition")
 # 4. Create plot list for plot_grid function to reference
 PlotList <- lapply(numvariables, function(x) PlotFunc(dfTrain3, x, Attr))
 
-# 5. Grid of all categorical variables plotted against Attrition
+#  Grid of all categorical variables plotted against Attrition
 plot_grid(plotlist = PlotList)
 ```
 
@@ -217,33 +213,29 @@ dfTrain4 %>% ggplot() + geom_bar(aes(x = dfTrain4$Education, fill = Attrition), 
 
 ```{r Automated EDA: Categorical v Categorical (Attrition) all at once}
 # 1. Name target variable
-targetCatCat1 <- "Attrition"
+FuncAttr <- "Attrition"
 
 # 2. Name explanatory variable
-explanatory1 <- dfTrain4 %>% keep(is.factor) %>% colnames
+Func2 <- dfTrain4 %>% keep(is.factor) %>% colnames
 
 # 3. Create function
-numCatCat1 <- function(df, explanatory, response) {
+BarFunc <- function(df, explanatory, response) {
   ggplot(data = df) +geom_bar(aes_string(x = explanatory, fill = response), position = "fill", alpha = 0.9) + coord_flip() + xlab(explanatory)
 }
 
   # Example of working function above
-  #numCatCat1(dfTrain4, explanatory = "MaritalStatus", response = "Attrition")
+  #BarFunc(dfTrain4, explanatory = "MaritalStatus", response = "Attrition")
 
 
 # 4. Create plot list for plot_grid function to reference
-plotlistCatCat1 <- lapply(explanatory1, function(x) numCatCat1(dfTrain3, x, targetCatCat1))
+plotlist2 <- lapply(Func2, function(x) BarFunc(dfTrain3, x, FuncAttr))
 
 # 5. Grid of all categorical variables plotted against Attrition
-plot_grid(plotlist = plotlistCatCat1)
+plot_grid(plotlist = plotlist2)
 ```
 
-***
-#### After Categorical v Categorical Review
-- Remove variables that show a small | zero difference within the levels/categories of the y variable
-    - "BusinessTravel", "Department", "Education", "EducationField", "EnvironmentSatisfaction", "Gender", "JobRole", "JobSatisfaction", "MartialStatus", "RelationshipSatisfaction", "JobLevel"
-- Keep variables that show a large difference within the levels/categories of the y variable
-    - "JobInvolvement", "WorkLifeBalance", "Overtime", "StockOptionLevel"
+# Categorical v Categorical Review
+# Drop variables that show a small difference within the levels/categories of the response variable and Keep variables that show a large difference within the levels/categories
 
 ```{r}
 #skim(dfTrain4)
@@ -263,7 +255,7 @@ dfTrain6 <- dfTrain5 %>%
 
 
 ***
-### 9. KNN Model Variables to Reduce Variables
+#Let's narrow down on the variables by using KNN 
 - Categorical: "JobInvolvement", "JobLevel", "OverTime", "StockOptionLevel", "WorkLifeBalance"
 - Numerical: "Age", "MonthlyIncome", "NumCompaniesWorked", "YearsInCurrentRole"
 
@@ -383,8 +375,8 @@ plot(spec$k, spec$specificity, type = "l", xlab = "k")
 #### Final Model (7)
 
 ```{r}
-invisible(knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k= 19))
-classificationdfTrain = knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k= 19)
+invisible(knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k= 20))
+classificationdfTrain = knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k= 20)
 CMdfTrain8 = confusionMatrix(table(testdfTrain$Attrition, classificationdfTrain))
 CMdfTrain8
 ```
