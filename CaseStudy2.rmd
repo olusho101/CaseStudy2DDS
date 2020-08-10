@@ -439,11 +439,34 @@ CompSetResult %>% ggplot() + geom_bar(aes(x = WorkLifeBalance, fill = Attrition)
 
 ### Write CSV of fitted CompSet Data Set
 ```{r}
-#write_csv(CompSetResult, "/Users/Jaco/Desktop/SMU/Fall2019/DS_6306_Doing_Data_Science/Unit_14CaseStudy2\\CompSetSet.csv")
+#write_csv(CompSetResult, "/Users/olusho/Documents/CaseStudy2DDS\\CCase2Predictions  AttritionOnalaja.csv")
 ```
 
+#To  be completed
+# Salary set analysis
+## KNN Model Used to Predict Attrition
+```{r}
+
+SalarySet <- read.csv("CaseStudy2CompSet No Salary.csv", header = TRUE, strip.white=TRUE)
+head(SalarySet)
+
+#Work Life Balance, Years in Current Role, Age
+Salary <- select(SalarySet, c("ID", "WorkLifeBalance", "YearsInCurrentRole", "Age"))
+
+SalaryEst <- data.frame(knn(traindfTrain[,c(8,1,3)], Salary[,c(2,3,4)], traindfTrain$MonthlyIncome, prob = TRUE, k = 19))
+
+#Join the original table and the competition set
+SalSetResult <- cbind(Salary, SalaryEst)
+
+#Set Column name for Attrition
+colnames(SalSetResult)[5] <- "Salary"
+
+write_csv(SalSetResult, "/Users/olusho/Documents/CaseStudy2DDS\\CCase2Predictions  SalaryOnalaja.csv")
+
+```
 # Things I had to walk away from
 #### Trying to mean of all three variables
+
 
 ```{r}
 #iterations = 100
