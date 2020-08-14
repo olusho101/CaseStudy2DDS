@@ -55,6 +55,100 @@ invisible(ncol(dfTrain))
 invisible(skim(dfTrain))
 ```
 
+
+
+# Job Role Trends
+## Categorical v Categorical
+- After reviewing the categorical variables to compare to our Job Roles the below would be insightful for our clients
+  - Attrition, OverTime, Job Satisfaction
+
+```{r Categorical v Categorical}
+#str(dfTrain)
+
+JobdfTrain = dfTrain
+skim(JobdfTrain)
+
+JobdfTrain$Education <- as.factor(dfTrain$Education)
+JobdfTrain$EnvironmentSatisfaction <- as.factor(dfTrain$EnvironmentSatisfaction)
+JobdfTrain$JobLevel <- as.factor(dfTrain$JobLevel)
+JobdfTrain$JobInvolvement <- as.factor(dfTrain$JobInvolvement)
+JobdfTrain$JobSatisfaction <- as.factor(dfTrain$JobSatisfaction)
+JobdfTrain$RelationshipSatisfaction <- as.factor(dfTrain$RelationshipSatisfaction)
+JobdfTrain$StockOptionLevel <- as.factor(dfTrain$StockOptionLevel)
+JobdfTrain$WorkLifeBalance <- as.factor(dfTrain$WorkLifeBalance)
+
+skim(JobdfTrain)
+ncol(JobdfTrain)
+JobdfTrain %>% ggplot() + geom_bar(aes(x = Attrition, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+
+JobdfTrain %>% ggplot() + geom_bar(aes(x = BusinessTravel, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+
+JobdfTrain %>% ggplot() + geom_bar(aes(x = EnvironmentSatisfaction, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+
+JobdfTrain %>% ggplot() + geom_bar(aes(x = Gender, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+
+JobdfTrain %>% ggplot() + geom_bar(aes(x = JobSatisfaction, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+
+JobdfTrain %>% ggplot() + geom_bar(aes(x = JobInvolvement, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+
+JobdfTrain %>% ggplot() + geom_bar(aes(x = OverTime, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+
+JobdfTrain %>% ggplot() + geom_bar(aes(x = PerformanceRating, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+
+JobdfTrain %>% ggplot() + geom_bar(aes(x = WorkLifeBalance, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+```
+
+```{r }
+#Remove variables that show less trends
+
+#Funtion to plot a grip barplot for  job role trends
+# Name target variable
+JobroleVar <- "JobRole"
+
+# Name explanatory variable
+ExpVar <- JobdfTrain %>% keep(is.factor) %>% colnames
+
+# Create function
+JobroleFunc <- function(df, explanatory, response) {
+  ggplot(data = df) + geom_bar(aes_string(x = explanatory, fill = response), position = "fill", alpha = 0.9) + coord_flip() + xlab(explanatory) + ylab("")
+}
+
+  # Example of working function above
+  #JobroleFunc(dfTrain, explanatory = "Education", response = "Attrition")
+
+
+#  Create plot list for plot_grid function to reference
+JobrolePlotList <- lapply(ExpVar, function(x) JobroleFunc(JobdfTrain, x, JobroleVar))
+
+#  Grid of all categorical variables plotted against Attrition
+plot_grid(plotlist = JobrolePlotList)
+```
+
+## Job role Categorical v Numeric
+- After reviewing the numeric variables to compare to our Job Roles the below would be insightful for our clients
+  - Age, Years Since Last Promotion, Distance from Home, Years At Company
+
+```{r Job Role v Age}
+dfTrain %>% ggplot() + geom_boxplot(aes(x = JobRole, y = Age, fill = JobRole)) +
+  theme_excel_new() + ggtitle("Job Role v Age") + ylab("Education")
+```
+
+```{r Job Role v Years Since Last Promotion}
+dfTrain %>% ggplot() + geom_boxplot(aes(x = JobRole, y = YearsSinceLastPromotion, fill = JobRole)) +
+  theme_excel_new() + ggtitle("Job Role v Years Since Last Promotion")
+```
+
+```{r Job Role v Distance from Home}
+dfTrain %>% ggplot() + geom_boxplot(aes(x = JobRole, y = DistanceFromHome, fill = JobRole)) +
+  theme_excel_new() + ggtitle("Job Role v Distance from Home")
+```
+
+```{r Job Role v Years At Company}
+dfTrain %>% ggplot() + geom_boxplot(aes(x = JobRole, y = YearsAtCompany, fill = JobRole)) +
+  theme_excel_new() + ggtitle("Job Role v Years At Company")
+```
+
+
 ```{r, echo=FALSE}
 #Continuous variables are: 
 # "TotalWorkingYears", "TrainingTimesLastYear", "YearsAtCompany","Age", , "HourlyRate", "MonthlyIncome", "MonthlyRate", "NumCompaniesWorked", , "YearsSinceLastPromotion", "YearsWithCurrManager", "StandardHours" "PercentSalaryHike",  "YearsInCurrentRole", "DailyRate", "DistanceFromHome", "EmployeeCount"
@@ -266,15 +360,6 @@ dfTrain6 <- dfTrain5 %>%
 - Numerical: "Age", "MonthlyIncome", "NumCompaniesWorked", "YearsInCurrentRole"
 
 ### Review of multiple models
-```{r}
-set.seed(8)
-splitPerc = .8
-trnInddfTrain = sample(1:dim(dfTrain6)[1], round(splitPerc * dim(dfTrain6)[1]))
-
-traindfTrain = dfTrain6[trnInddfTrain,]
-
-testdfTrain = dfTrain6[-trnInddfTrain,]
-```
 
 # Age, Job Involvement, Job Level
 
@@ -367,7 +452,7 @@ testdfTrain = dfTrain6[-trnInddfTrain,]
 spec = data.frame(specificity = numeric(30), k = numeric(30))
 for (i in 1:30) 
   {
-  classificationdfTrain = knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k=i)
+  classificationdfTrain = knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k=19)
   table(testdfTrain$Attrition, classificationdfTrain)
   CMdfTrain8 = confusionMatrix(table(testdfTrain$Attrition, classificationdfTrain))
   spec$specificity[i] = CMdfTrain8$byClass[2]
@@ -471,131 +556,32 @@ write_csv(SalSetResult, "/Users/olusho/Documents/CaseStudy2DDS\\CCase2Prediction
 
 #RMSE
 
-model_lm <- lm(traindfTrain$MonthlyIncome ~ traindfTrain$Attrition)
-salary_value <- predict(model_lm, traindfTrain)
-salary_value
-diffeerence <- salary_value - traindfTrain$MonthlyIncome 
-diffeerence
-sqrt(mean(diffeerence^2))
-summary(model_lm)
+set.seed(3)
+splitPerc = .8
+
+DimSalary = sample(1:dim(SalSetResult)[1], round(splitPerc * dim(SalSetResult)[1]))
+trainSalary = SalSetResult[DimSalary,]
+testSalary = SalSetResult[-DimSalary,]
+
+a = as.numeric(SalSetResult$Salary)
+SalaryModel = lm(a ~ WorkLifeBalance + YearsInCurrentRole + Age, data = SalSetResult)
+summary(SalaryModel)
+
+PredSalaryModel = predict(SalaryModel, newdata = testSalary)
+
+b = as.numeric(testSalary$Salary)
+
+RSME1 = sqrt(mean((b - PredSalaryModel)^2))
 
 
-sqrt(mean((traindfTrain$MonthlyIncome-SalSetResult$Salary)^2))
-
-###as.factor(SalSetResult$Salary)
-summary(model_lm)
 
 
 
 
-summary(traindfTrain)
+
+
+
 
 ```
-# Things I had to walk away from
-#### Trying to mean of all three variables
 
-
-```{r}
-#iterations = 100
-#numks = 100 
-#masterAcc = matrix(nrow = iterations, ncol = numks)
-#for(j in 1:iterations) {
-#  accs = data.frame(accuracy = numeric(numks), k = numeric(numks))
-#  trnInddfTrain = sample(1:dim(dfTrain6)[1], round(splitPerc * dim(dfTrain6)[1]))
-#  traindfTrain = dfTrain6[trnInddfTrain,]
-#  testdfTrain = dfTrain6[-trnInddfTrain,]
-#  for(i in 1:numks) {
-#    classificationdfTrain = knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k=i)
-#    table(testdfTrain$Attrition, classificationdfTrain)
-#    CMdfTrain8 = confusionMatrix(table(testdfTrain$Attrition, classificationdfTrain))
-#    masterAcc[j,i] = CMdfTrain8$overall[1]
-#  }
-#}
-
-#MeanAcc = colMeans(masterAcc)
-#plot(seq(1,numks,1),MeanAcc, type = "l")
-#k <- which.max(MeanAcc)
-
-#@@@@@@@@@@@@@@@@@@
-
-#iterations = 500
-#masterAcc = matrix(nrow = iterations)
-#masterSen = matrix(nrow = iterations)
-#masterSpec = matrix(nrow = iterations)
-#splitPer = .7
-#for (j in 1:iterations)
-#  {
-#  trnInddfTrain = sample(1:dim(dfTrain6)[1],round(splitPerc * dim(dfTrain6)[1]))
-#  traindfTrain = dfTrain6[trnInddfTrain,]
-#  testdfTrain = dfTrain6[-trnInddfTrain,]
-#  
-#  classificationdfTrain = knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k=i)
-#  table(testdfTrain$Attrition, classificationdfTrain)
-#  
-#  CMdfTrainInt = confusionMatrix(table(testdfTrain$Attrition, classificationdfTrain))
-#  masterAcc[j] = CMdfTrainInt$overall[1]
-#  masterSen[j] = CMdfTrainInt$byClass[1]
-#  masterSpec[j] = CMdfTrainInt$byClass[2]
-#}
-
-#MeanAccUFrit = colMeans(masterAcc)
-#MeanAccUFrit
-#MeanSenFrit = colMeans(masterSen)
-#MeanSenFrit
-#MeanSpecFrit = colMeans(masterSpec)
-#MeanSpecFrit
-```  
-
-
-
-
-### 10. NaiveBates Model to Reduce Variables
-- Categorical: "JobInvolvement", "JobLevel", "OverTime", "StockOptionLevel", "WorkLifeBalance"
-- Numerical: "Age", "MonthlyIncome", "NumCompaniesWorked", "YearsInCurrentRole"
-
-#### 1. All Variable
-
-```{r}
-#set.seed(4)
-#splitPerc = .7
-#trnInddfTrain = sample(1:dim(dfTrain5)[1], round(splitPerc * dim(dfTrain5)[1]))
-#trnInddfTrain
-
-#traindfTrain = dfTrain6[trnInddfTrain,]
-#traindfTrain
-
-#testdfTrain = dfTrain6[-trnInddfTrain,]
-#testdfTrain
-
-#nBdfTrain1 <- naiveBayes(Attrition ~ . , data = traindfTrain)
-
-#predict(nBdfTrain1, testdfTrain[,c(1,3,4)], type = "raw")
-
-#table(predict(nBdfTrain1, testdfTrain[,c(1,3,4)], type = "raw"), testdfTrain$Attrition)
-
-
-
-
-
-
-#modelU7.s4 <- naiveBayes(Survived ~ . , data =  trainTitanicU7.s4)
-
-#predict(modelU7.s4, testTitanicU7.s4[,c(2,4)], type = "raw")
-
-#table(predict(modelU7.s4, testTitanicU7.s4[,c(2,4)]), testTitanicU7.s4$Survived)
-
-#CMU7.s4 = confusionMatrix(table(predict(modelU7.s4, testTitanicU7.s4[,c(2,4)]), testTitanicU7.s4$Survived))
-#CMU7.s4
-
-#knn(trainTitanicU7.s4[,c(2,4)], testTitanicU7.s4[,c(2,4)],trainTitanicU7.s4$Survived, prob = TRUE, k = 11)
-#classKNN.s4 = knn(trainTitanicU7.s4[,c(2,4)], testTitanicU7.s4[,c(2,4)],trainTitanicU7.s4$Survived, prob = TRUE, k = 11)
-#CMknnU7.s4 = confusionMatrix(table(testTitanicU7.s4$Survived, classKNN.s4))
-#CMknnU7.s4
-```
-
-```{r}
-```
-
-```{r}
-```
 
