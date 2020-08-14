@@ -11,7 +11,13 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r environment libraries, echo=FALSE}
+```{r}
+#Summary
+#The purpose of this project is to explore what variables are good predictors for attrition rates in Fortune 1000 companies and also we will create a model that will predict if an employee will leave their company voluntarily or not. Finally, we will look at other trends associated with specific jobs and attrition rates.
+```
+
+```{r}
+#environment libraries
 library(tidyverse)
 library(corrplot)
 library(mlbench)
@@ -34,7 +40,7 @@ library(naniar)
 # Build a model for Attrition 
 
 # Start by Tidying and Exploring the dT
-I am cheking for the Correlation, the Trends and the Causation
+#I am cheking for the Correlation, the Trends and the Causation
 
 # Remove missing values if available in data set
 # Seperate continous variables from categorical variables
@@ -62,7 +68,7 @@ invisible(skim(dfTrain))
 - After reviewing the categorical variables to compare to our Job Roles the below would be insightful for our clients
   - Attrition, OverTime, Job Satisfaction
 
-```{r Categorical v Categorical}
+```{r}
 #str(dfTrain)
 
 JobdfTrain = dfTrain
@@ -79,26 +85,13 @@ JobdfTrain$WorkLifeBalance <- as.factor(dfTrain$WorkLifeBalance)
 
 skim(JobdfTrain)
 ncol(JobdfTrain)
-JobdfTrain %>% ggplot() + geom_bar(aes(x = Attrition, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+#JobdfTrain %>% ggplot() + geom_bar(aes(x = Attrition, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
 
-JobdfTrain %>% ggplot() + geom_bar(aes(x = BusinessTravel, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+#JobdfTrain %>% ggplot() + geom_bar(aes(x = Gender, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+#JobdfTrain %>% ggplot() + geom_bar(aes(x = JobSatisfaction, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+#JobdfTrain %>% ggplot() + geom_bar(aes(x = OverTime, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
+#JobdfTrain %>% ggplot() + geom_bar(aes(x = WorkLifeBalance, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
 
-JobdfTrain %>% ggplot() + geom_bar(aes(x = EnvironmentSatisfaction, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
-
-JobdfTrain %>% ggplot() + geom_bar(aes(x = Gender, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
-
-JobdfTrain %>% ggplot() + geom_bar(aes(x = JobSatisfaction, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
-
-JobdfTrain %>% ggplot() + geom_bar(aes(x = JobInvolvement, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
-
-JobdfTrain %>% ggplot() + geom_bar(aes(x = OverTime, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
-
-JobdfTrain %>% ggplot() + geom_bar(aes(x = PerformanceRating, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
-
-JobdfTrain %>% ggplot() + geom_bar(aes(x = WorkLifeBalance, fill = JobRole), position = "fill", alpha = 0.9) + coord_flip()
-```
-
-```{r }
 #Remove variables that show less trends
 
 #Funtion to plot a grip barplot for  job role trends
@@ -149,7 +142,7 @@ dfTrain %>% ggplot() + geom_boxplot(aes(x = JobRole, y = YearsAtCompany, fill = 
 ```
 
 
-```{r, echo=FALSE}
+```{r}
 #Continuous variables are: 
 # "TotalWorkingYears", "TrainingTimesLastYear", "YearsAtCompany","Age", , "HourlyRate", "MonthlyIncome", "MonthlyRate", "NumCompaniesWorked", , "YearsSinceLastPromotion", "YearsWithCurrManager", "StandardHours" "PercentSalaryHike",  "YearsInCurrentRole", "DailyRate", "DistanceFromHome", "EmployeeCount"
 
@@ -221,14 +214,14 @@ ncol(dfTrain3)
 ```
 
 # Checking to see the correlation on numeric variables
-- Highly correlated relationships
-  - Total Working Years v Monthly Income: .78
-  - Years at Company v Years in Current Role .78
-  - Years at Company v Years with Current Manager .77
-  - Years at Company v Total Working Years .64
-  - Years at Company v Years Since Last Promotion .64
-  - Years with Current Manager v Years in Current Role .71
-  - Age vs Tota Working Years 65%
+#Highly correlated relationships
+#Total Working Years v Monthly Income: 78%
+#Years at Company v Years in Current Role: 78%
+#Years at Company v Years with Current Manager: 77%
+#Years at Company v Total Working Years: 64%
+#Years at Company v Years Since Last Promotion: 64%
+#Years with Current Manager v Years in Current Role: 71%
+#Age vs Tota Working Years: 65%
   
 
 ```{r high correlation}
@@ -255,9 +248,9 @@ ncol(dfTrain3)
 
 # EDA Numerical variables vs Categorical variables
 #Comparison of Attrition (the variable of interest) to categorical variables left in model
-  - Colored by Attrition
-  - If density plot shows peaks in separate areas then important variable
-  - If density plot shows peaks in the same spot (clean overlay) then not an important variable
+# Plot will be filled by Attrition
+#If density plot shows peaks in separate areas then important variable
+#If density plot shows peaks in the same spot (clean overlay) then not an important variable
 
 ```{r Automated EDA: Numeric v  Catgorical: all at once}
 # 1. Name target variable
@@ -284,8 +277,8 @@ plot_grid(plotlist = PlotList)
 # After Numeric v Categorical Review
 # Get rid of variables that have similar trends
 # Remove variables that show the Yes and No of Attrition having the same patterns
-- Keep variables that are showing opposite peaks as in the graphs
-    - "MonthlyIncome", "YearsInCurrentRole", "NumCompaniesWorked", "Age"
+#Keep variables that are showing opposite peaks as in the graphs
+#"MonthlyIncome", "YearsInCurrentRole", "NumCompaniesWorked", "Age"
 
 ```{r}
 
@@ -296,14 +289,13 @@ ncol(dfTrain4)
 
 
 ### 8. Categorical v Categorical (Attrition)
-- Y | Fill
-- Comparison of Attrition (dependent variable of interest) to categorical variables in model
-- Bar chart with percentages instead of totals
-  - Colored by Attrition
-  - If bar chart shows a large difference within the levels/categories of the y variable then it is identified as an important variable to include in the model
-  - If bar chart shows a small or zero difference within the levels/categories of the y variable then it is not an important variable to include in the model
+#Comparison of Attrition (dependent variable of interest) to categorical variables in model
+#Bar chart with percentages instead of totals
+#Colored by Attrition
+#If bar chart shows a large difference within the levels/categories of the y variable then it is identified as an important variable to include in the model
+#If bar chart shows a small or zero difference within the levels/categories of the y variable then it is not an important variable to include in the model
 
-```{r Categorical v Categorical (Attrition)}
+```{r}
 str(dfTrain4)
 dfTrain4 %>% ggplot() + geom_bar(aes(x = Education, fill = Attrition), position = "fill", alpha = 0.9) + coord_flip()
 ```
@@ -311,7 +303,7 @@ dfTrain4 %>% ggplot() + geom_bar(aes(x = Education, fill = Attrition), position 
 
 #### Automated EDA: Categorical v Categorical (Attrition) all at once
 
-```{r Automated EDA: Categorical v Categorical (Attrition) all at once}
+```{r}
 # 1. Name target variable
 FuncAttr <- "Attrition"
 
@@ -354,7 +346,7 @@ dfTrain6 <- dfTrain5 %>%
 ```
 
 
-***
+
 #Let's narrow down on the variables by using KNN 
 - Categorical: "JobInvolvement", "JobLevel", "OverTime", "StockOptionLevel", "WorkLifeBalance"
 - Numerical: "Age", "MonthlyIncome", "NumCompaniesWorked", "YearsInCurrentRole"
@@ -462,7 +454,7 @@ plot(spec$k, spec$specificity, type = "l", xlab = "k")
 #k <- which.max(spec$specificity)
 ```
 
-***
+
 #### Final Model (7)
 
 ```{r}
@@ -472,17 +464,16 @@ CMdfTrain8 = confusionMatrix(table(testdfTrain$Attrition, classificationdfTrain)
 CMdfTrain8
 ```
 
-***
 ## Final KNN Prediction Model for Attrition
-- Attrition is most closely identified by taking into account
-  1. Number of companies a person has worked.
-  2. If they do or do not have to work overtime.
-  3. An employee's stock option level
-- Accuracy > 84%
-- Sensitivity > 84%
-- Specificity = 75%
+# Attrition is most closely identified by taking into account
+# Number of companies a person has worked.
+# If they do or do not have to work overtime.
+# An employee's stock option level
+# Accuracy > 84%
+# Sensitivity > 84%
+# Specificity = 75%
 
-***
+
 ## CompSet Set Analysis
 ```{r}
 CompSet <- read.csv("CaseStudy2CompSet No Attrition.csv", header = TRUE, strip.white=TRUE)
@@ -533,7 +524,7 @@ CompSetResult %>% ggplot() + geom_bar(aes(x = WorkLifeBalance, fill = Attrition)
 #write_csv(CompSetResult, "/Users/olusho/Documents/CaseStudy2DDS\\CCase2Predictions  AttritionOnalaja.csv")
 ```
 
-#To  be completed
+
 # Salary set analysis
 ## KNN Model Used to Predict Attrition
 ```{r}
