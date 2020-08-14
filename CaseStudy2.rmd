@@ -2,8 +2,10 @@
 title: "Attrition RMD"
 author: "Samuel"
 date: "8/4/2020"
-output: html_document
-editor_options: 
+output:
+  html_document: default
+  pdf_document: default
+editor_options:
   chunk_output_type: console
 ---
 
@@ -268,7 +270,7 @@ PlotFunc <- function(df, explanatory, response) {
 PlotFunc(dfTrain3, explanatory =  "TotalWorkingYears", response = "Attrition")
 
 # 4. Create plot list for plot_grid function to reference
-PlotList <- lapply(numvariables, function(x) PlotFunc(dfTrain3, x, Attr))
+PlotList <- lapply(ExplVar, function(x) PlotFunc(dfTrain3, x, Attr))
 
 #  Grid of all categorical variables plotted against Attrition
 plot_grid(plotlist = PlotList)
@@ -320,7 +322,7 @@ BarFunc <- function(df, explanatory, response) {
 
 
 # 4. Create plot list for plot_grid function to reference
-plotlist2 <- lapply(Func2, function(x) BarFunc(dfTrain3, x, FuncAttr))
+plotlist2 <- lapply(Func2, function(x) BarFunc(dfTrain4, x, FuncAttr))
 
 # 5. Grid of all categorical variables plotted against Attrition
 plot_grid(plotlist = plotlist2)
