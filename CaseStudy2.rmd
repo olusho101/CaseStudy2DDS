@@ -63,7 +63,19 @@ invisible(ncol(dfTrain))
 invisible(skim(dfTrain))
 ```
 
+# Missing data evaluation {data-background=""}
+There is no missing value
 
+```{r NA eval}
+vis_miss(dfTrain)
+md.pattern(dfTrain)
+
+#### We see that there are 3 patterns: 
+ # 870  observations with complete information 
+#  0 observations have a NA in IBU
+# 32 variables
+
+```
 
 # Job Role Trends
 ## Categorical v Categorical
@@ -120,8 +132,8 @@ plot_grid(plotlist = JobrolePlotList)
 ```
 
 ## Job role Categorical v Numeric
-- After reviewing the numeric variables to compare to our Job Roles the below would be insightful for our clients
-  - Age, Years Since Last Promotion, Distance from Home, Years At Company
+#After reviewing the numeric variables to compare to our Job Roles the below would be insightful for our clients
+#Age, Years Since Last Promotion, Distance from Home, Years At Company
 
 ```{r Job Role v Age}
 dfTrain %>% ggplot() + geom_boxplot(aes(x = JobRole, y = Age, fill = JobRole)) +
@@ -158,20 +170,6 @@ dfTrain %>% ggplot() + geom_boxplot(aes(x = JobRole, y = YearsAtCompany, fill = 
 ```
 
 
-# Missing data evaluation {data-background=""}
-There is no missing value
-
-```{r NA eval}
-vis_miss(dfTrain)
-md.pattern(dfTrain)
-
-#### We see that there are 3 patterns: 
- # 870  observations with complete information 
-#  0 observations have a NA in IBU
-# 32 variables
-
-```
-
 # Remove all zero variance variables, this can be checked using the skim() function
 
 ```{r zero variance variables}
@@ -182,7 +180,7 @@ ncol(dfTrain2)
 ```
 
 
-# Remove unwanted variables
+# Remove unnecessary variables
 
 ```{r}
 
@@ -192,8 +190,7 @@ ncol(dfTrain3)
 
 ```
 
-# Check if all categorical variables are stored as factors, if not then convert all categorical variables to factors
-# The categorical variables are; "Attrition", "BusinessTravel", "Department", "EducationField", "Gender", "JobRole", "MaritalStatus", "Over18", "OverTime"
+# Check if all level variables are stored as factors, if not then convert to from numeric to factor
 
 
 # Storing all level numeric variables as factors
@@ -217,11 +214,11 @@ ncol(dfTrain3)
 
 # Checking to see the correlation on numeric variables
 #Highly correlated relationships
-#Total Working Years v Monthly Income: 78%
-#Years at Company v Years in Current Role: 78%
-#Years at Company v Years with Current Manager: 77%
-#Years at Company v Total Working Years: 64%
-#Years at Company v Years Since Last Promotion: 64%
+#Total Working Years vs Monthly Income: 78%
+#Years at Company vs Years in Current Role: 78%
+#Years at Company vs Years with Current Manager: 77%
+#Years at Company vs Total Working Years: 64%
+#Years at Company vs Years Since Last Promotion: 64%
 #Years with Current Manager v Years in Current Role: 71%
 #Age vs Tota Working Years: 65%
   
@@ -255,13 +252,13 @@ ncol(dfTrain3)
 #If density plot shows peaks in the same spot (clean overlay) then not an important variable
 
 ```{r Automated EDA: Numeric v  Catgorical: all at once}
-# 1. Name target variable
+# Name target variable
 Attr <- "Attrition"
 
-# 2. Name explanatory variable
+# Name explanatory variable
 ExplVar<- dfTrain3 %>% keep(is.numeric) %>% colnames
 
-# 3. Create function
+# Create function
 PlotFunc <- function(df, explanatory, response) {
   ggplot(data = df) + geom_density(aes_string(x = explanatory, fill = response), alpha = 0.5) + xlab(explanatory) + ylab("Attrition")
 }
@@ -269,14 +266,14 @@ PlotFunc <- function(df, explanatory, response) {
   # Density plot
 PlotFunc(dfTrain3, explanatory =  "TotalWorkingYears", response = "Attrition")
 
-# 4. Create plot list for plot_grid function to reference
+#  Create plot list for plot_grid function to reference
 PlotList <- lapply(ExplVar, function(x) PlotFunc(dfTrain3, x, Attr))
 
 #  Grid of all categorical variables plotted against Attrition
 plot_grid(plotlist = PlotList)
 ```
 
-# After Numeric v Categorical Review
+# After Numeric vs Categorical Review
 # Get rid of variables that have similar trends
 # Remove variables that show the Yes and No of Attrition having the same patterns
 #Keep variables that are showing opposite peaks as in the graphs
@@ -306,13 +303,13 @@ dfTrain4 %>% ggplot() + geom_bar(aes(x = Education, fill = Attrition), position 
 #### Automated EDA: Categorical v Categorical (Attrition) all at once
 
 ```{r}
-# 1. Name target variable
+# Name target variable
 FuncAttr <- "Attrition"
 
-# 2. Name explanatory variable
+# Name explanatory variable
 Func2 <- dfTrain4 %>% keep(is.factor) %>% colnames
 
-# 3. Create function
+# Create function
 BarFunc <- function(df, explanatory, response) {
   ggplot(data = df) +geom_bar(aes_string(x = explanatory, fill = response), position = "fill", alpha = 0.9) + coord_flip() + xlab(explanatory)
 }
@@ -321,10 +318,10 @@ BarFunc <- function(df, explanatory, response) {
   #BarFunc(dfTrain4, explanatory = "MaritalStatus", response = "Attrition")
 
 
-# 4. Create plot list for plot_grid function to reference
+# Create plot list for plot_grid function to reference
 plotlist2 <- lapply(Func2, function(x) BarFunc(dfTrain4, x, FuncAttr))
 
-# 5. Grid of all categorical variables plotted against Attrition
+# Grid of all categorical variables plotted against Attrition
 plot_grid(plotlist = plotlist2)
 ```
 
@@ -349,9 +346,33 @@ dfTrain6 <- dfTrain5 %>%
 
 
 
-#Let's narrow down on the variables by using KNN 
-- Categorical: "JobInvolvement", "JobLevel", "OverTime", "StockOptionLevel", "WorkLifeBalance"
-- Numerical: "Age", "MonthlyIncome", "NumCompaniesWorked", "YearsInCurrentRole"
+#### Find best k for Model Work Life Balance, Years in Current Role, Age
+- Best k: 15 - 23
+```{r find best k}
+set.seed(8)
+splitPerc = .8
+trnInddfTrain = sample(1:dim(dfTrain6)[1], round(splitPerc * dim(dfTrain6)[1]))
+
+traindfTrain = dfTrain6[trnInddfTrain,]
+
+testdfTrain = dfTrain6[-trnInddfTrain,]
+
+spec = data.frame(specificity = numeric(30), k = numeric(30))
+for (i in 1:30) 
+  {
+  classificationdfTrain = knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k=i)
+  table(testdfTrain$Attrition, classificationdfTrain)
+  CMdfTrain8 = confusionMatrix(table(testdfTrain$Attrition, classificationdfTrain))
+  spec$specificity[i] = CMdfTrain8$byClass[2]
+  spec$k[i] = i
+}
+plot(spec$k, spec$specificity, type = "l", xlab = "k")
+#k <- which.max(spec$specificity)
+
+```
+#Let's narrow down on the variables and ezperiment models by using KNN 
+#Categorical: "JobInvolvement", "JobLevel", "OverTime", "StockOptionLevel", "WorkLifeBalance"
+#Numerical: "Age", "MonthlyIncome", "NumCompaniesWorked", "YearsInCurrentRole"
 
 ### Review of multiple models
 
@@ -422,7 +443,7 @@ dfTrain6 <- dfTrain5 %>%
 #CMdfTrain8
 ```
 
-# Montly Income (4) Over Time(6) Stock Option Level (7)
+# Montly Income,  OverTime, Stock Option Level
 ```{r}
 #invisible(knn(traindfTrain[,c(4,6,7)], testdfTrain[,c(4,6,7)], traindfTrain$Attrition, prob = TRUE, k=19))
 #classificationdfTrain = knn(traindfTrain[,c(4,6,7)], testdfTrain[,c(4,6,7)], traindfTrain$Attrition, prob = TRUE, k=19)
@@ -430,38 +451,13 @@ dfTrain6 <- dfTrain5 %>%
 #CMdfTrain8
 ```
 
-
-
-#### Find best k for Model 7
-- Best k: 15 - 23
-```{r find best k}
-set.seed(8)
-splitPerc = .8
-trnInddfTrain = sample(1:dim(dfTrain6)[1], round(splitPerc * dim(dfTrain6)[1]))
-
-traindfTrain = dfTrain6[trnInddfTrain,]
-
-testdfTrain = dfTrain6[-trnInddfTrain,]
-
-spec = data.frame(specificity = numeric(30), k = numeric(30))
-for (i in 1:30) 
-  {
-  classificationdfTrain = knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k=19)
-  table(testdfTrain$Attrition, classificationdfTrain)
-  CMdfTrain8 = confusionMatrix(table(testdfTrain$Attrition, classificationdfTrain))
-  spec$specificity[i] = CMdfTrain8$byClass[2]
-  spec$k[i] = i
-}
-plot(spec$k, spec$specificity, type = "l", xlab = "k")
-#k <- which.max(spec$specificity)
-```
-
-
 #### Final Model (7)
 
 ```{r}
-invisible(knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k= 20))
-classificationdfTrain = knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k= 20)
+
+
+
+classificationdfTrain = knn(traindfTrain[,c(8,1,3)], testdfTrain[,c(8,1,3)], traindfTrain$Attrition, prob = TRUE, k= 14)
 CMdfTrain8 = confusionMatrix(table(testdfTrain$Attrition, classificationdfTrain))
 CMdfTrain8
 ```
@@ -471,9 +467,9 @@ CMdfTrain8
 # Number of companies a person has worked.
 # If they do or do not have to work overtime.
 # An employee's stock option level
-# Accuracy > 84%
-# Sensitivity > 84%
-# Specificity = 75%
+# Accuracy > 85%
+# Sensitivity > 85%
+# Specificity = 100%
 
 
 ## CompSet Set Analysis
@@ -506,24 +502,18 @@ invisible(CompSetResult)
 CompSetResult %>% ggplot(mapping = aes(x = Attrition)) + geom_bar() + ggtitle("Comeptition Set: Attrition Count") + theme_excel_new()
 
 dfTrain %>% ggplot(mapping = aes(x = Attrition)) + geom_bar() + ggtitle("Original Data: Attrition Count") + theme_excel_new()
-```
 
-### Checking model results aginst graphical analysis
-
-```{r}
 CompSetResult %>% ggplot() + geom_density(aes(x = Age, fill = Attrition, alpha = .1)) +
   theme_excel_new() + ggtitle("Attrition v Age") + ylab("Attrition") + xlab("Age")
-```
 
-### Checking model against graphical analysis
+#CompSetResult %>% ggplot() + geom_bar(aes(x = Age, fill = Attrition), position = "fill", alpha = .7) + coord_flip()
 
-```{r}
-CompSetResult %>% ggplot() + geom_bar(aes(x = WorkLifeBalance, fill = Attrition), position = "fill", alpha = .7) + coord_flip()
+#CompSetResult %>% ggplot() + geom_bar(aes(x = WorkLifeBalance, fill = Attrition), position = "fill", alpha = .7) + coord_flip()
 ```
 
 ### Write CSV of fitted CompSet Data Set
 ```{r}
-#write_csv(CompSetResult, "/Users/olusho/Documents/CaseStudy2DDS\\CCase2Predictions  AttritionOnalaja.csv")
+write_csv(CompSetResult, "/Users/olusho/Documents/CaseStudy2DDS\\CCase2Predictions  AttritionOnalaja.csv")
 ```
 
 
@@ -568,13 +558,11 @@ RSME1 = sqrt(mean((b - PredSalaryModel)^2))
 
 
 
-
-
-
-
-
-
-
 ```
+# Conclusion
 
+Using the variable WorkLifeBalance, YearsInCurrentRole, Age, I created  a model to predict the employee attrition rate at an accuracy of 85%. During the data exploration i discover some of the variables are highly correlated and so i decided to elimate such variables as they tend to tell the same stories. I see that people with low job involvement rating seems to have high attrition rate, It also seems the lower the monthly income the higher the attrition rate, i also visualise that people with the age of 19 to 25 has a higher attrition rate. I also explore the job role and as expected i see that managers and research director has the highest job level rating while laboratory technician and reseach scientist has the highest percentage in low job ratings, I also see that managers have being at the company for longer year than any other job role, they also have the highest percentage of older people while sales representatives shows the lowest in these two instances.
 
+This write is supplemented by a video presentation, with the link below;
+
+https://youtu.be/dTKI104rQM0
